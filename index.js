@@ -45,6 +45,9 @@ const schema = {
         },
         "standalone": {
             "type": "boolean"
+        },
+        "transformUrl": {
+            "instanceof": "Function"
         }
     },
     "additionalProperties": false
@@ -73,6 +76,7 @@ class AngularTemplateCacheWebpackPlugin {
             templateFooter: userOptions.templateFooter === undefined ? TEMPLATE_FOOTER : userOptions.templateFooter,
             escapeOptions: userOptions.escapeOptions === undefined ? {} : userOptions.escapeOptions,
             standalone: !!userOptions.standalone,
+            transformUrl: userOptions.transformUrl
         };
 
         this.options = Object.assign(defaultOptions, userOptions);
@@ -146,6 +150,10 @@ class AngularTemplateCacheWebpackPlugin {
             let url = path.join(this.options.root, filename);
             if (this.options.root === '.' || this.options.root.indexOf('./') === 0) {
                 url = './' + url;
+            }
+
+            if (typeof this.options.transformUrl === 'function') {
+                url = this.options.transformUrl(url);
             }
 
             tpl.source = lodashTemplate(this.templateBody)({
